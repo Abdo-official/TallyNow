@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نموذج تجميع إجابات</title>
+  <style>
+    body {
+      font-family: 'Tahoma', sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #002c5f;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 24px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 30px auto;
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #002c5f;
+    }
+    .question {
+      margin-bottom: 20px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 10px;
+    }
+    .question label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .options {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .counter {
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+      margin: 0 10px;
+    }
+    .summary {
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+      margin-top: 5px;
+    }
+    .clickable-option {
+      background-color: #0062cc;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .clickable-option:hover {
+      background-color: #004a99;
+    }
+    .decrement-button {
+      background-color: #ff4d4d;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .decrement-button:hover {
+      background-color: #cc0000;
+    }
+    .save-button {
+      display: block;
+      margin: 30px auto 10px auto;
+      background-color: #28a745;
+      color: white;
+      padding: 12px 24px;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .save-button:hover {
+      background-color: #1e7e34;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    نموذج الإجابة
+  </header>
+
+  <div class="container">
+    <h2>اهدأ وركز وتحدث بلطف😊🤍:</h2>
+    <div id="questions"></div>
+    <button class="save-button" onclick="saveResponses('csv')">💾 حفظ كـ CSV</button>
+    <button class="save-button" onclick="saveResponses('txt')">📄 حفظ كـ TXT</button>
+  </div>
+
+  <script>
+    const questions = [
+      'هل كان الوقت كافيًا لحل الامتحان؟',
+      'هل كانت الأسئلة واضحة؟',
+      'هل الامتحان جاء من المنهج؟',
+      'هل واجهت صعوبة في الأسئلة؟',
+      'هل استفدت من المراجعات قبل الامتحان؟',
+      'هل كانت التعليمات في اللجنة واضحة؟',
+      'هل شعرت بالراحة أثناء الامتحان؟',
+      'هل الأسئلة متنوعة في المستويات؟',
+      'هل تتوقع الحصول على درجة جيدة؟',
+      'هل ترغب في المزيد من الدعم قبل الامتحانات؟'
+    ];
+
+    const counters = {};
+
+    const container = document.getElementById('questions');
+    questions.forEach((q, i) => {
+      counters[i] = { نعم: 0, لا: 0 };
+
+      const div = document.createElement('div');
+      div.className = 'question';
+      div.innerHTML = `
+        <label>${q}</label>
+        <div class="options">
+          <button class="clickable-option" onclick="increment(${i}, 'نعم')">نعم</button>
+          <span id="yesCount${i}" class="counter">0</span>
+          <button class="decrement-button" onclick="decrement(${i}, 'نعم')">−</button>
+
+          <button class="clickable-option" onclick="increment(${i}, 'لا')">لا</button>
+          <span id="noCount${i}" class="counter">0</span>
+          <button class="decrement-button" onclick="decrement(${i}, 'لا')">−</button>
+        </div>
+        <div class="summary" id="summary${i}">عدد الإجابات: نعم (0) - لا (0) - الإجمالي: 0</div>
+      `;
+      container.appendChild(div);
+    });
+
+    function increment(index, answer) {
+      counters[index][answer]++;
+      updateDisplay(index);
+    }
+
+    function decrement(index, answer) {
+      if (counters[index][answer] > 0) {
+        counters[index][answer]--;
+        updateDisplay(index);
+      }
+    }
+
+    function updateDisplay(index) {
+      document.getElementById(`yesCount${index}`).textContent = counters[index].نعم;
+      document.getElementById(`noCount${index}`).textContent = counters[index].لا;
+      const total = counters[index].نعم + counters[index].لا;
+      document.getElementById(`summary${index}`).textContent = `عدد الإجابات: نعم (${counters[index].نعم}) - لا (${counters[index].لا}) - الإجمالي: ${total}`;
+    }
+
+    function saveResponses(type) {
+      let data = '';
+      if (type === 'csv') {
+        data += '\uFEFFسؤال,نعم,لا,الإجمالي\n';
+        questions.forEach((q, i) => {
+          const total = counters[i].نعم + counters[i].لا;
+          data += `${q},${counters[i].نعم},${counters[i].لا},${total}\n`;
+        });
+      } else {
+        questions.forEach((q, i) => {
+          const total = counters[i].نعم + counters[i].لا;
+          data += `سؤال: ${q}\nنعم: ${counters[i].نعم}\nلا: ${counters[i].لا}\nالإجمالي: ${total}\n----------------------\n`;
+        });
+      }
+
+      const blob = new Blob([data], { type: type === 'csv' ? 'text/csv;charset=utf-8;' : 'text/plain;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", type === 'csv' ? "survey_results.csv" : "survey_results.txt");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  </script>
+</body>
+</html>
